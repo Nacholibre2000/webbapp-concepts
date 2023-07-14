@@ -7,6 +7,11 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 Flask = "^2.3.2"
+google-cloud-storage = "2.10.0"
+mysql-connector-python = "8.0.33"
+xds-protos = "^0.0.11"
+SQLAlchemy = "2.0.18"
+pymysql = "1.1.0"
 
 [tool.poetry.dev-dependencies]
 
