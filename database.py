@@ -1,6 +1,5 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import mysql.connector
 from google.oauth2.service_account import Credentials
 from google.cloud import storage
 
@@ -27,18 +26,27 @@ from google.cloud import storage
 # buckets = list(client.list_buckets())
 # print(buckets)
 
-# Create a SQLAlchemy engine
-# This is where you specify your database connection parameters
-engine = create_engine('mysql+pymysql://<main-2023-06-30-d22nkf>:<password>@<hostname>:<port>/<dbname>')
+# Connect to Google Cloud SQL
+config = {
+  'user': os.getenv('DB_USER'),
+  'password': os.getenv('DB_PASS'),
+  'host': os.getenv('DB_HOST'),
+  'database': os.getenv('DB_NAME'),
+  'use_pure': True
+}
 
-# Create a SQLAlchemy ORM session factory bound to this engine
-Session = sessionmaker(bind=engine)
+cnx = mysql.connector.connect(**config)
 
-# Create a new session
-session = Session()
+cursor = cnx.cursor()
 
-# Now you can use `session` to query the database
-# ...
+# Execute a simple query
+cursor.execute("SHOW DATABASES")
 
-# Don't forget to close the session when you're done
-session.close()
+# Fetch all the rows
+databases = cursor.fetchall()
+
+for database in databases:
+    print(database)
+
+cursor.close()
+cnx.close()
