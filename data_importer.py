@@ -9,7 +9,7 @@ def import_subjects(bucket, engine):
     data = blob.download_as_text()
 
     # Define the column(s) you want to keep
-    columns_to_keep = ['id', 'subject', 'foreign_id_schools']
+    columns_to_keep = ['id', 'subject', 'foreign_id_school']
 
     # Read the CSV file with only the specified column
     df = pd.read_csv(BytesIO(data.encode('utf-8')), usecols=columns_to_keep)
