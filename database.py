@@ -38,4 +38,13 @@ bucket = client.get_bucket('web-app-concepts-storage')  # replace with your buck
 #data_importer.import_subjects(bucket, engine)
 
 # To import grades
-data_importer.import_grades(bucket, engine)
+#data_importer.import_grades(bucket, engine)
+
+# To import subsections
+#data_importer.import_subsections(bucket, engine)
+
+# To import central contents
+#data_importer.import_central_contents(bucket, engine)
+
+# To import central requirements
+data_importer.import_central_requirements(bucket, engine)
