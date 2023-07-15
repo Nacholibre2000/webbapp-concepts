@@ -32,5 +32,10 @@ engine = create_engine(f'mysql+mysqlconnector://{os.getenv("DB_USER")}:{os.geten
 # Get the CSV file from Google Cloud Storage
 bucket = client.get_bucket('web-app-concepts-storage')  # replace with your bucket name
 
-# Call your import function
-data_importer.import_data(bucket, engine)
+# Import functions
+
+# To import subjects
+data_importer.import_subjects(bucket, engine)
+
+# To import grades
+#data_importer.import_grades(bucket, engine)

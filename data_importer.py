@@ -1,7 +1,23 @@
 import pandas as pd
 from io import BytesIO
 
-def import_data(bucket, engine):
+def import_subjects(bucket, engine):
+    # Get the CSV file from Google Cloud Storage
+    blob = bucket.blob('subjects_data.csv')  # replace 'subjects_data.csv' with your actual filename
+
+    # Download the CSV as a string
+    data = blob.download_as_text()
+
+    # Define the column(s) you want to keep
+    columns_to_keep = ['id', 'subject', 'foreign_id_schools']
+
+    # Read the CSV file with only the specified column
+    df = pd.read_csv(BytesIO(data.encode('utf-8')), usecols=columns_to_keep)
+
+    # Write the data to MySQL
+    df.to_sql('subjects', engine, if_exists='append', index=False)
+  
+def import_grades(bucket, engine):
     # Get the CSV file from Google Cloud Storage
     blob = bucket.blob('grades_data.csv')  # replace 'grades_data.csv' with your actual filename
 
@@ -19,3 +35,5 @@ def import_data(bucket, engine):
 
     # Write the data to MySQL
     df.to_sql('grades', engine, if_exists='append', index=False)
+
+
