@@ -1,4 +1,4 @@
-run = "python database.py"
+run = "python website/app.py"
 
 # The primary language of the repl. There can be others, though!
 language = "python3"
@@ -89,4 +89,4 @@ pattern = "**/*.py"
 start = "pylsp"
 
 [deployment]
-run = ["sh", "-c", "python app.py"]
+run = ["sh", "-c", "python website/app.py"]
