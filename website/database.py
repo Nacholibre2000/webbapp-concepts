@@ -5,6 +5,7 @@ from sqlalchemy import text
 from google.oauth2.service_account import Credentials
 from google.cloud import storage
 from io import BytesIO
+import data_importer  # import the module you created
 
 # Retrieve each environment variable and store it in a dictionary.
 service_account_info = {
@@ -30,16 +31,20 @@ engine = create_engine(f'mysql+mysqlconnector://{os.getenv("DB_USER")}:{os.geten
 
 # Get the CSV file from Google Cloud Storage
 bucket = client.get_bucket('web-app-concepts-storage')  # replace with your bucket name
-blob = bucket.blob('subject_data.csv')
 
-# Download the CSV as a string
-data = blob.download_as_text()
+# Import functions
 
-# Define the column(s) you want to keep
-columns_to_keep = ['subject']
+# To import subjects
+#data_importer.import_subjects(bucket, engine)
 
-# Read the CSV file with only the specified column
-df = pd.read_csv(BytesIO(data.encode('utf-8')), usecols=columns_to_keep)
+# To import grades
+#data_importer.import_grades(bucket, engine)
 
-# Write the data to MySQL
-df.to_sql('subjects', engine, if_exists='append', index=False)
+# To import subsections
+#data_importer.import_subsections(bucket, engine)
+
+# To import central contents
+#data_importer.import_central_contents(bucket, engine)
+
+# To import central requirements
+data_importer.import_central_requirements(bucket, engine)
