@@ -69,6 +69,18 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
+name = "flask-login"
+version = "0.6.2"
+description = "User authentication and session management for Flask."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+Flask = ">=1.0.4"
+Werkzeug = ">=1.0.1"
+
+[[package]]
 name = "google-api-core"
 version = "2.11.1"
 description = "Google API client core library"
@@ -496,7 +508,7 @@ protobuf = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "64da790c02640c6b494d4b6efc2b1b228b6b2f0e03c7fc8fb5c7a0217df03250"
+content-hash = "b908e717202344b2a2d47df5056068174c7c736cd5af13abbff3543013c40bd3"
 
 [metadata.files]
 blinker = []
@@ -506,6 +518,7 @@ charset-normalizer = []
 click = []
 colorama = []
 flask = []
+flask-login = []
 google-api-core = []
 google-auth = []
 google-cloud-core = []
