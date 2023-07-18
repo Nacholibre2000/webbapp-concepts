@@ -81,6 +81,29 @@ Flask = ">=1.0.4"
 Werkzeug = ">=1.0.1"
 
 [[package]]
+name = "flask-script"
+version = "2.0.6"
+description = "Scripting support for Flask"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = "*"
+
+[[package]]
+name = "flask-sqlalchemy"
+version = "3.0.5"
+description = "Add SQLAlchemy support to your Flask application."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+flask = ">=2.2.5"
+sqlalchemy = ">=1.4.18"
+
+[[package]]
 name = "google-api-core"
 version = "2.11.1"
 description = "Google API client core library"
@@ -508,7 +531,7 @@ protobuf = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "b908e717202344b2a2d47df5056068174c7c736cd5af13abbff3543013c40bd3"
+content-hash = "c0e9bfd04822da05def78860d230db35d19e63149312b7f18de7ffa9f35a99eb"
 
 [metadata.files]
 blinker = []
@@ -519,6 +542,8 @@ click = []
 colorama = []
 flask = []
 flask-login = []
+flask-script = []
+flask-sqlalchemy = []
 google-api-core = []
 google-auth = []
 google-cloud-core = []

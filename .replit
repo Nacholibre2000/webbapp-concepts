@@ -1,4 +1,4 @@
-run = "python main.py"
+run = "python website/database.py"
 
 # The primary language of the repl. There can be others, though!
 language = "python3"

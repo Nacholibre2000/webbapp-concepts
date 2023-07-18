@@ -2,17 +2,10 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from google.oauth2.service_account import Credentials
 from google.cloud import storage
 from io import BytesIO
 import data_importer  # import the module you created
-
-Base = declarative_base()
-
-engine = create_engine(f'mysql+mysqlconnector://{os.getenv("DB_USER")}:{os.getenv("DB_PASS")}@{os.getenv("DB_HOST")}/{os.getenv("DB_NAME")}')
-Session = sessionmaker(bind=engine)
 
 # Retrieve each environment variable and store it in a dictionary.
 service_account_info = {
@@ -42,16 +35,16 @@ bucket = client.get_bucket('web-app-concepts-storage')  # replace with your buck
 # Import functions
 
 # To import subjects
-#data_importer.import_subjects(bucket, engine)
+#data_importer.import_subjects(bucket, db.engine)
 
 # To import grades
-#data_importer.import_grades(bucket, engine)
+#data_importer.import_grades(bucket, db.engine)
 
 # To import subsections
-#data_importer.import_subsections(bucket, engine)
+#data_importer.import_subsections(bucket, db.engine)
 
 # To import central contents
-#data_importer.import_central_contents(bucket, engine)
+#data_importer.import_central_contents(bucket, db.engine)
 
 # To import central requirements
 data_importer.import_central_requirements(bucket, engine)
