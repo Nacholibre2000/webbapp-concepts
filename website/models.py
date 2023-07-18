@@ -1,9 +1,17 @@
-from sqlalchemy import Column, Integer, String
-from .database import Base
+from . import db
+from flask_login import UserMixin
+from sqlalchemy.sql import func
 
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    email = Column(String(150), unique=True)
-    first_name = Column(String(50))
-    password = Column(String(150))
+class Users(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(150))
+    first_name = db.Column(db.String(150))
+    concepts = db.relationship('Concepts')
+
+class Concepts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    concept = db.Column(db.String(100))
+    explanation = db.Column(db.String(1000))
+    date = db.Column(db.DateTime(timezone=True), default=func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
