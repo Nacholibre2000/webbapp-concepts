@@ -1,21 +1,21 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
 %}
 <h1 align="center">Concepts</h1>
-<ul class="list-group list-group-flush" id="notes">
-  {% for note in user.user_concepts %}
+<ul class="list-group list-group-flush" id="concepts">
+  {% for concept in user.user_concepts %}
   <li class="list-group-item">
-    {{ note.concept }}
-    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+    {{ concept.concept }}
+    <button type="button" class="close" onClick="deleteConcept({{ concept.id }})">
       <span aria-hidden="true">&times;</span>
     </button>
   </li>
   {% endfor %}
 </ul>
 <form method="POST">
-  <textarea name="note" id="note" class="form-control"></textarea>
+  <textarea name="concept" id="concept" class="form-control"></textarea>
   <br />
   <div align="center">
-    <button type="submit" class="btn btn-primary">Add Note</button>
+    <button type="submit" class="btn btn-primary">Add Concept</button>
   </div>
 </form>
 {% endblock %}
