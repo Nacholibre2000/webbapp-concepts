@@ -2,7 +2,10 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 import os
+
+load_dotenv()  # take environment variables from .env.
 
 db = SQLAlchemy()
 

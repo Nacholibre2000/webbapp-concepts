@@ -6,6 +6,9 @@ from google.oauth2.service_account import Credentials
 from google.cloud import storage
 from io import BytesIO
 import data_importer  # import the module you created
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
 
 # Retrieve each environment variable and store it in a dictionary.
 service_account_info = {

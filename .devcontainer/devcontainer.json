@@ -12,5 +12,5 @@
     "settings": { 
         "terminal.integrated.shell.linux": "/bin/bash"
     },
-    "postCreateCommand": "poetry install && npm install"
+    "postCreateCommand": "[ -f package.json ] && npm install; [ -f pyproject.toml ] && poetry config virtualenvs.create false && poetry install"
 }
