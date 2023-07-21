@@ -1,0 +1,16 @@
+{
+    "name": "Python and Node.js Project",
+    "dockerFile": "Dockerfile",
+    "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "batisteo.vscode-django",
+        "dsznajder.es7-react-js-snippets",
+        "xabikos.JavaScriptSnippets"
+    ],
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "postCreateCommand": "poetry install && npm install"
+}
