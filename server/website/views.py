@@ -35,3 +35,10 @@ def delete_concept():
             db.session.commit()
 
     return jsonify({})
+
+# React connectivity test
+@views.route('/heyreact', methods=['GET', 'POST'])
+def return_heyreact():
+    return jsonify({
+        'message': "Hey React!"
+    })

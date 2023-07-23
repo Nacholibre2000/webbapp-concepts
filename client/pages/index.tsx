@@ -4,15 +4,15 @@ function index() {
   const [message, setMessage] = useState('Loading')
 
   useEffect(() => {
-    fetch("http://172.16.5.4:8080/home")
+    fetch("http://172.16.5.4:8080/heyreact")
       .then((response) => response.json())
       .then((data) => {
-          console.log(data);
+          setMessage(data.message);
       });
   }, []);
 
   return (
-    <div>index</div>
+    <div>{message}</div>
   )
 }
 
