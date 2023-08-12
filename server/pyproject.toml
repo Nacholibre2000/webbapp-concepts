@@ -17,6 +17,7 @@ Flask-Login = "0.6.2"
 Flask-Script = "2.0.6"
 Flask-SQLAlchemy = "^3.0.5"
 python-dotenv = "^1.0.0"
+flask-cors = "^4.0.0"
 
 [tool.poetry.dev-dependencies]
 
