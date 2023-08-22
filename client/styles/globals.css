@@ -27,6 +27,7 @@ body {
 }
 
 .gradient-bar {
-  @apply h-12; /* Tailwind's height utility */
-  background: linear-gradient(45deg, blue 50%, red 50%);
+  @apply h-40; /* Tailwind's height utility */
+  background: linear-gradient(110deg, rgb(250, 197, 40) 0%,  rgb(250, 197, 40) 20%, rgb(20, 255, 161) 20.25%, rgb(20, 255, 161) 80%);
 }
+
