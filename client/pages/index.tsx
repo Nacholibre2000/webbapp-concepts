@@ -1,4 +1,17 @@
 import React, { useEffect, useState } from "react";
+import Layout from '../components/Layout';
+
+const Home: React.FC = () => {
+  return (
+    <Layout>
+      {/* Your main content here */}
+    </Layout>
+  );
+};
+
+export default Home;
+
+
 
 function index() {
   const [message, setMessage] = useState("Loading");
@@ -20,4 +33,4 @@ function index() {
   return <div>Index</div>;
 }
 
-export default index;
+/* export default index; */
