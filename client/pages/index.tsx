@@ -13,7 +13,7 @@ export default Home;
 
 
 
-function index() {
+/* function index() {
   const [message, setMessage] = useState("Loading");
   //const [people, setPeople] = useState([]);
 
@@ -31,6 +31,6 @@ function index() {
   }, []);
 
   return <div>Index</div>;
-}
+} */
 
 /* export default index; */
