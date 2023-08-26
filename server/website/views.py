@@ -1,11 +1,23 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
-from .models import Concepts
+from .models import Concepts, Subjects 
 from . import db
-import json
 
 views = Blueprint('views', __name__)
 
+@views.route('/api/sidebar-data', methods=['GET'])
+def get_sidebar_data():
+    # Fetch data using SQLAlchemy's ORM
+    subjects = Subjects.query.with_entities(Subjects.subject).all()  
+    
+    # Convert the data to a JSON-serializable format, filtering out 'subjects'
+    json_data = [row[0] for row in subjects if row[0].lower() != 'subjects']
+
+    return app.response_class(
+        response=json.dumps(json_data, ensure_ascii=False),
+        status=200,
+        mimetype='application/json'
+    )
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
