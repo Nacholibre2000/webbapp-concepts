@@ -14,3 +14,11 @@ class Concepts(db.Model):
     concept = db.Column(db.String(10000))
     date = db.Column(db.DateTime(timezone=True), default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+class Subjects(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(60))
+    foreign_id_school = (db.Integer)
+
+    def __repr__(self):
+        return f'<Subject {self.name}>'

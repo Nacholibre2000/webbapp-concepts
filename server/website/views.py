@@ -1,10 +1,20 @@
 from flask import Blueprint, render_template, request, flash, jsonify
 from flask_login import login_required, current_user
-from .models import Concepts
+from .models import Concepts, Subjects
 from . import db
 import json
 
 views = Blueprint('views', __name__)
+
+@views.route('/api/sidebar-data', methods=['GET'])
+def get_sidebar_data():
+    # Query the database to get the data
+    sidebar_data = db.session.query(Subjects).all()  # Replace YourModel with the actual model class
+
+    # Convert the data to a JSON-serializable format
+    json_data = [{"subject": item.subject} for item in sidebar_data]  # Replace 'name' with the actual field you want to use
+
+    return jsonify(json_data)
 
 
 @views.route('/', methods=['GET', 'POST'])
