@@ -29,19 +29,23 @@ export default function Sidebar() {
     fetch(`http://localhost:8080/api/related_items/${item.table}/${item.id}`)
       .then((res) => res.json())
       .then((relatedItems) => {
+        console.log("Related Items from API:", relatedItems); // debugging
         item.children = relatedItems.map((relatedItem: any, index: number) => ({
           id: relatedItem.id,
           name: relatedItem.name,
           table: getNextTable(item.table),
         }));
         setData([...data]);
+        console.log("Updated data state:", data); // debugging
       });
   };
 
   const getNextTable = (currentTable: string) => {
-    // Logic to determine the next table based on the current table
-    // For example, if currentTable is 'Schools', return 'Subjects'
-  };
+    // Implement your logic here
+    // For example:
+    if (currentTable === 'Schools') return 'Subjects';
+    // Add more conditions for other tables
+  };  
 
   const renderTree = (items: Item[]) => {
     return (

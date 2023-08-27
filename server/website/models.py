@@ -16,6 +16,7 @@ class Concepts(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class Schools(db.Model):
+    __tablename__ = 'schools' 
     id = db.Column(db.Integer, primary_key=True)
     school = db.Column(db.String(40))
 
@@ -29,6 +30,7 @@ class Schools(db.Model):
         }
 
 class Subjects(db.Model):
+    __tablename__ = 'subjects' 
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(60))
     foreign_id_school = (db.Integer)
@@ -44,6 +46,7 @@ class Subjects(db.Model):
         }
 
 class Grades(db.Model):
+    __tablename__ = 'grades' 
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.String(120))
     foreign_id_subject = (db.Integer)
@@ -59,6 +62,7 @@ class Grades(db.Model):
         }
 
 class Subsections(db.Model):
+    __tablename__ = 'subsections' 
     id = db.Column(db.Integer, primary_key=True)
     subsection = db.Column(db.String(120))
     foreign_id_grade = (db.Integer)
@@ -74,6 +78,7 @@ class Subsections(db.Model):
         }
 
 class Central_contents(db.Model):
+    __tablename__ = 'central_contents' 
     id = db.Column(db.Integer, primary_key=True)
     central_content = db.Column(db.String(450))
     foreign_id_subsection = (db.Integer)
@@ -89,6 +94,7 @@ class Central_contents(db.Model):
         }
 
 class Central_requirements(db.Model):
+    __tablename__ = 'central_requirements' 
     id = db.Column(db.Integer, primary_key=True)
     central_requirement = db.Column(db.String(450))
     foreign_id_grade = (db.Integer)

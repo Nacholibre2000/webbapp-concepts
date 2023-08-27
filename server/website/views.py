@@ -15,21 +15,21 @@ def get_sidebar_data():
 @views.route('/api/related_items/<string:table_name>/<int:item_id>', methods=['GET'])
 def get_related_items(table_name, item_id):
     if table_name == 'Schools':  
-        related_subjects = Subjects.query.filter_by(school_id=item_id).all()
+        related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
         return jsonify([subject.serialize() for subject in related_subjects])
     elif table_name == 'Subjects': 
-        related_grades = Grades.query.filter_by(subject_id=item_id).all()
+        related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
         return jsonify([grade.serialize() for grade in related_grades])
     elif table_name == 'Grades':
-        related_subsections = Subsections.query.filter_by(grade_id=item_id).all()
-        related_central_requirements = Central_requirements.query.filter_by(grade_id=item_id).all()  # Changed the foreign key
+        related_subsections = Subsections.query.filter_by(foreign_id_grade=item_id).all()
+        related_central_requirements = Central_requirements.query.filter_by(foreign_id_grade=item_id).all()  # Changed the foreign key
         combined = {
             'subsections': [subsection.serialize() for subsection in related_subsections],
             'central_requirements': [central_requirement.serialize() for central_requirement in related_central_requirements]
         }
         return jsonify(combined)
     elif table_name == 'Subsections':
-        related_central_contents = Central_contents.query.filter_by(subsection_id=item_id).all()
+        related_central_contents = Central_contents.query.filter_by(foreign_id_subsection=item_id).all()
         return jsonify([central_content.serialize() for central_content in related_central_contents])
 
 @views.route('/', methods=['GET', 'POST'])
