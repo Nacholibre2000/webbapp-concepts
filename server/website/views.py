@@ -1,23 +1,36 @@
 from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
-from .models import Concepts, Subjects 
+from .models import Concepts, Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
 from . import db
 
 views = Blueprint('views', __name__)
 
+# Fetch initial data (schools)
 @views.route('/api/sidebar-data', methods=['GET'])
 def get_sidebar_data():
-    # Fetch data using SQLAlchemy's ORM
-    subjects = Subjects.query.with_entities(Subjects.subject).all()  
-    
-    # Convert the data to a JSON-serializable format, filtering out 'subjects'
-    json_data = [row[0] for row in subjects if row[0].lower() != 'subjects']
+    schools = Schools.query.all()
+    return jsonify([school.serialize() for school in schools])
 
-    return app.response_class(
-        response=json.dumps(json_data, ensure_ascii=False),
-        status=200,
-        mimetype='application/json'
-    )
+# Fetch related items based on table name and item ID
+@views.route('/api/related_items/<string:table_name>/<int:item_id>', methods=['GET'])
+def get_related_items(table_name, item_id):
+    if table_name == 'Schools':  
+        related_subjects = Subjects.query.filter_by(school_id=item_id).all()
+        return jsonify([subject.serialize() for subject in related_subjects])
+    elif table_name == 'Subjects': 
+        related_grades = Grades.query.filter_by(subject_id=item_id).all()
+        return jsonify([grade.serialize() for grade in related_grades])
+    elif table_name == 'Grades':
+        related_subsections = Subsections.query.filter_by(grade_id=item_id).all()
+        related_central_requirements = Central_requirements.query.filter_by(grade_id=item_id).all()  # Changed the foreign key
+        combined = {
+            'subsections': [subsection.serialize() for subsection in related_subsections],
+            'central_requirements': [central_requirement.serialize() for central_requirement in related_central_requirements]
+        }
+        return jsonify(combined)
+    elif table_name == 'Subsections':
+        related_central_contents = Central_contents.query.filter_by(subsection_id=item_id).all()
+        return jsonify([central_content.serialize() for central_content in related_central_contents])
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
