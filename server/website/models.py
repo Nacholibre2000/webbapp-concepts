@@ -21,7 +21,7 @@ class Schools(db.Model):
     school = db.Column(db.String(40))
 
     def __repr__(self):
-        return f'<School {self.name}>'
+        return f'<School {self.school}>'
     
     def serialize(self):
         return {
@@ -33,10 +33,10 @@ class Subjects(db.Model):
     __tablename__ = 'subjects' 
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(60))
-    foreign_id_school = (db.Integer)
+    foreign_id_school = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'<Subject {self.name}>'
+        return f'<Subject {self.subject}>'
 
     def serialize(self):
         return {
@@ -49,10 +49,10 @@ class Grades(db.Model):
     __tablename__ = 'grades' 
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.String(120))
-    foreign_id_subject = (db.Integer)
+    foreign_id_subject = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'<Grade {self.name}>'
+        return f'<Grade {self.grade}>'
     
     def serialize(self):
         return {
@@ -65,10 +65,10 @@ class Subsections(db.Model):
     __tablename__ = 'subsections' 
     id = db.Column(db.Integer, primary_key=True)
     subsection = db.Column(db.String(120))
-    foreign_id_grade = (db.Integer)
+    foreign_id_grade = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'<Subsection {self.name}>'
+        return f'<Subsection {self.subsection}>'
     
     def serialize(self):
         return {
@@ -81,10 +81,10 @@ class Central_contents(db.Model):
     __tablename__ = 'central_contents' 
     id = db.Column(db.Integer, primary_key=True)
     central_content = db.Column(db.String(450))
-    foreign_id_subsection = (db.Integer)
+    foreign_id_subsection = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'<Central_content {self.name}>'
+        return f'<Central_content {self.central_content}>'
     
     def serialize(self):
         return {
@@ -97,10 +97,10 @@ class Central_requirements(db.Model):
     __tablename__ = 'central_requirements' 
     id = db.Column(db.Integer, primary_key=True)
     central_requirement = db.Column(db.String(450))
-    foreign_id_grade = (db.Integer)
+    foreign_id_grade = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'<Central_requirement {self.name}>'
+        return f'<Central_requirement {self.central_requirement}>'
     
     def serialize(self):
         return {

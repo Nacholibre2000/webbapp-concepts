@@ -15,6 +15,9 @@ def get_sidebar_data():
 @views.route('/api/related_items/<string:table_name>/<int:item_id>', methods=['GET'])
 def get_related_items(table_name, item_id):
     if table_name == 'Schools':  
+        print("Executing query for related subjects with school ID:", item_id)  # Debugging line
+        related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
+        print("Query results:", related_subjects)  # Debugging line
         related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
         return jsonify([subject.serialize() for subject in related_subjects])
     elif table_name == 'Subjects': 
