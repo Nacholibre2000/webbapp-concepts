@@ -21,6 +21,9 @@ def get_related_items(table_name, item_id):
         related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
         return jsonify([subject.serialize() for subject in related_subjects])
     elif table_name == 'Subjects': 
+        print("Executing query for related subjects with subject ID:", item_id)  # Debugging line
+        related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
+        print("Query results:", related_grades)  # Debugging line
         related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
         return jsonify([grade.serialize() for grade in related_grades])
     elif table_name == 'Grades':
