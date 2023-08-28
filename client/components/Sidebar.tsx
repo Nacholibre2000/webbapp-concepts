@@ -30,22 +30,56 @@ export default function Sidebar() {
       .then((res) => res.json())
       .then((relatedItems) => {
         console.log("Related Items from API:", relatedItems); // debugging
-        item.children = relatedItems.map((relatedItem: any, index: number) => ({
-          id: relatedItem.id,
-          name: relatedItem.name,
-          table: getNextTable(item.table),
-        }));
-        setData([...data]);
-        console.log("Updated data state:", data); // debugging
+  
+        let newChildren: Item[] = [];
+  
+        if (item.table === 'Grades') {
+          // Special handling for 'Grades' which has related items in two tables
+          newChildren = [
+            ...relatedItems.subsections.map((subsection: any) => ({
+              id: subsection.id,
+              name: subsection.subsection,
+              table: 'Subsections',
+            })),
+            ...relatedItems.central_requirements.map((centralRequirement: any) => ({
+              id: centralRequirement.id,
+              name: centralRequirement.central_requirement,
+              table: 'Central_requirements',
+            })),
+          ];
+        } else {
+          // General handling for other tables
+          let nameField = 'name';  // default
+          if (item.table === 'Schools') nameField = 'subject';
+          if (item.table === 'Subjects') nameField = 'grade';
+          if (item.table === 'Subsections') nameField = 'central_content';
+  
+          newChildren = relatedItems.map((relatedItem: any) => ({
+            id: relatedItem.id,
+            name: relatedItem[nameField],
+            table: getNextTable(item.table),
+          }));
+        }
+  
+        const newData = data.map((dataItem) => {
+          if (dataItem.id === item.id) {
+            return { ...dataItem, children: newChildren };
+          }
+          return dataItem;
+        });
+  
+        setData(newData);
+        console.log("Updated data state:", newData); // debugging
       });
   };
-
+    
   const getNextTable = (currentTable: string) => {
-    // Implement your logic here
-    // For example:
     if (currentTable === 'Schools') return 'Subjects';
+    if (currentTable === 'Subjects') return 'Grades';
+    if (currentTable === 'Grades') return 'Subsections';
     // Add more conditions for other tables
-  };  
+    return null;  // or some default value
+  };
 
   const renderTree = (items: Item[]) => {
     return (
