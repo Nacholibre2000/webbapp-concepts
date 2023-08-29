@@ -26,6 +26,7 @@ export default function Sidebar() {
   }, []);  
 
   const fetchRelatedItems = (item: Item) => {
+    console.log("Item passed to fetchRelatedItems:", item);  // debugging
     fetch(`http://localhost:8080/api/related_items/${item.table}/${item.id}`)
       .then((res) => res.json())
       .then((relatedItems) => {
@@ -60,6 +61,8 @@ export default function Sidebar() {
             table: getNextTable(item.table),
           }));
         }
+        
+        console.log("newChildren:", newChildren);  // debugging
   
         const newData = data.map((dataItem) => {
           if (dataItem.id === item.id) {
@@ -67,9 +70,11 @@ export default function Sidebar() {
           }
           return dataItem;
         });
-  
+
+        console.log("Old data state:", data);  // debugging
         setData(newData);
-        console.log("Updated data state:", newData); // debugging
+        console.log("Deep log of newData:", JSON.stringify(newData, null, 2));
+
       });
   };
     
@@ -82,10 +87,11 @@ export default function Sidebar() {
   };
 
   const renderTree = (items: Item[]) => {
+    console.log("Rendering items:", items);  // Debugging line
     return (
       <ul>
         {items.map((item) => (
-          <li key={item.id}>
+          <li key={`${item.id}-${item.table}`}>
             <button 
               className="text-sm text-base text-gray-400 font-normal hover:text-gray-100 font-bold block mb-2"
               onClick={() => fetchRelatedItems(item)}
@@ -98,6 +104,7 @@ export default function Sidebar() {
       </ul>
     );
   };
+  
 
   return <aside className="bg-gray-800 text-white w-80 p-10">{renderTree(data)}</aside>;
 }
