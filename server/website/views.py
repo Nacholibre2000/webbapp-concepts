@@ -5,38 +5,48 @@ from . import db
 
 views = Blueprint('views', __name__)
 
-# Fetch initial data (schools)
-@views.route('/api/sidebar-data', methods=['GET'])
-def get_sidebar_data():
-    schools = Schools.query.all()
-    return jsonify([school.serialize() for school in schools])
-
-# Fetch related items based on table name and item ID
-@views.route('/api/related_items/<string:table_name>/<int:item_id>', methods=['GET'])
-def get_related_items(table_name, item_id):
-    if table_name == 'Schools':  
-        print("Executing query for related subjects with school ID:", item_id)  # Debugging line
+def fetch_related_items(table_name, item_id):
+    print(f"Fetching related items for table: {table_name}, ID: {item_id}")  # Debugging line
+    children = []
+    if table_name == 'Schools':
         related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
-        print("Query results:", related_subjects)  # Debugging line
-        related_subjects = Subjects.query.filter_by(foreign_id_school=item_id).all()
-        return jsonify([subject.serialize() for subject in related_subjects])
-    elif table_name == 'Subjects': 
-        print("Executing query for related subjects with subject ID:", item_id)  # Debugging line
+        for subject in related_subjects:
+            subject_dict = subject.serialize()
+            subject_dict['children'] = fetch_related_items('Subjects', subject.id)
+            children.append(subject_dict)
+    elif table_name == 'Subjects':
         related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
-        print("Query results:", related_grades)  # Debugging line
-        related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
-        return jsonify([grade.serialize() for grade in related_grades])
+        for grade in related_grades:
+            grade_dict = grade.serialize()
+            grade_dict['children'] = fetch_related_items('Grades', grade.id)
+            children.append(grade_dict)
     elif table_name == 'Grades':
         related_subsections = Subsections.query.filter_by(foreign_id_grade=item_id).all()
-        related_central_requirements = Central_requirements.query.filter_by(foreign_id_grade=item_id).all()  # Changed the foreign key
-        combined = {
-            'subsections': [subsection.serialize() for subsection in related_subsections],
-            'central_requirements': [central_requirement.serialize() for central_requirement in related_central_requirements]
-        }
-        return jsonify(combined)
+        related_central_requirements = Central_requirements.query.filter_by(foreign_id_grade=item_id).all()
+        for subsection in related_subsections:
+            subsection_dict = subsection.serialize()
+            subsection_dict['children'] = fetch_related_items('Subsections', subsection.id)
+            children.append(subsection_dict)
+        for central_requirement in related_central_requirements:
+            children.append(central_requirement.serialize())
     elif table_name == 'Subsections':
         related_central_contents = Central_contents.query.filter_by(foreign_id_subsection=item_id).all()
-        return jsonify([central_content.serialize() for central_content in related_central_contents])
+        for central_content in related_central_contents:
+            children.append(central_content.serialize())
+    return children
+
+@views.route('/api/sidebar-data', methods=['GET'])
+def get_sidebar_data():
+    print("Fetching initial sidebar data...")  # Debugging line
+    schools = Schools.query.all()
+    school_data = []
+    for school in schools:
+        print(f"Processing school: {school}")  # Debugging line
+        school_dict = school.serialize()
+        school_dict['children'] = fetch_related_items('Schools', school.id)
+        school_data.append(school_dict)
+    print(f"Final sidebar data: {school_data}")  # Debugging line
+    return jsonify(school_data)
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
