@@ -46,6 +46,7 @@ def get_sidebar_data():
         school_dict['children'] = fetch_related_items('Schools', school.id)
         school_data.append(school_dict)
     print(f"Final sidebar data: {school_data}")  # Debugging line
+    print("JSON Response:", jsonify(school_data).get_json())  # Add this line
     return jsonify(school_data)
 
 @views.route('/', methods=['GET', 'POST'])

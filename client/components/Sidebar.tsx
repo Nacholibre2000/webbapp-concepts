@@ -14,24 +14,26 @@ export default function Sidebar() {
     fetch('http://localhost:8080/api/sidebar-data')
       .then((res) => res.json())
       .then((allData) => {
+        console.log("All data from API:", allData);  // Debugging line
+  
         const mapToDisplayName = (item: any) => {
-          if ('school' in item) return item.school;
-          if ('subject' in item) return item.subject;
-          // Add more conditions here for other tables
-          // Example:
-          // if ('grade' in item) return item.grade;
-          // if ('subsection' in item) return item.subsection;
-          return "Unnamed Item";
-        };        
-
-        const mappedData = allData.map((item: any) => ({
-          ...item,
-          displayName: mapToDisplayName(item),
-        }));
-
+          return item.school || item.subject || item.grade || "Unnamed Item";
+        };
+  
+        const mapDataRecursively = (data: any[]): any[] => {
+          return data.map((item: any) => {
+            const newItem = { ...item, displayName: mapToDisplayName(item) };
+            if (item.children) {
+              newItem.children = mapDataRecursively(item.children);
+            }
+            return newItem;
+          });
+        };
+  
+        const mappedData = mapDataRecursively(allData);
         setData(mappedData);
       });
-  }, []);
+  }, []);  
 
   const toggleExpand = (id: number) => {
     const newExpandedItems = new Set(expandedItems);
@@ -44,10 +46,13 @@ export default function Sidebar() {
   };
 
   const renderTree = (items: Item[], level: number = 0) => {
-    if (level >= 2) return null;
-
+    console.log("Items at level", level, ":", items);
+    if (level >= 5) return null;
+  
+    const indent = 10 * level;  // 20 pixels of indentation per level
+  
     return (
-      <ul>
+      <ul style={{ marginLeft: `${indent}px` }}>
         {items.map((item) => (
           <li key={`${item.id}-${item.table}`}>
             <button 
@@ -62,6 +67,7 @@ export default function Sidebar() {
       </ul>
     );
   };
+  
 
   return <aside className="bg-gray-800 text-white w-80 p-10">{renderTree(data)}</aside>;
 }
