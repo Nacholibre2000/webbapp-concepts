@@ -17,7 +17,7 @@ export default function Sidebar() {
         console.log("All data from API:", allData);  // Debugging line
   
         const mapToDisplayName = (item: any) => {
-          return item.school || item.subject || item.grade || "Unnamed Item";
+          return item.school || item.subject || item.grade || item.subsection || item.central_requirement || item.central_content || "Unnamed Item";
         };
   
         const mapDataRecursively = (data: any[]): any[] => {
@@ -32,18 +32,21 @@ export default function Sidebar() {
   
         const mappedData = mapDataRecursively(allData);
         setData(mappedData);
+        setExpandedItems(new Set());  // Reset the expanded items
       });
   }, []);  
 
   const toggleExpand = (id: number) => {
-    const newExpandedItems = new Set(expandedItems);
-    if (newExpandedItems.has(id)) {
-      newExpandedItems.delete(id);
-    } else {
-      newExpandedItems.add(id);
-    }
-    setExpandedItems(newExpandedItems);
-  };
+  console.log("Toggling item with id:", id);  // Debugging line
+  const newExpandedItems = new Set(expandedItems);
+  if (newExpandedItems.has(id)) {
+    newExpandedItems.delete(id);
+  } else {
+    newExpandedItems.add(id);
+  }
+  console.log("New expanded items:", newExpandedItems);  // Debugging line
+  setExpandedItems(newExpandedItems);
+};
 
   const renderTree = (items: Item[], level: number = 0) => {
     console.log("Items at level", level, ":", items);
