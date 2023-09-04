@@ -26,7 +26,8 @@ class Schools(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'school': self.school
+            'school': self.school,
+            'table': self.__tablename__ 
         }
 
 class Subjects(db.Model):
@@ -42,7 +43,8 @@ class Subjects(db.Model):
         return {
             'id': self.id,
             'subject': self.subject,
-            'foreign_id_school': self.foreign_id_school
+            'foreign_id_school': self.foreign_id_school,
+            'table': self.__tablename__ 
         }
 
 class Grades(db.Model):
@@ -58,7 +60,8 @@ class Grades(db.Model):
         return {
             'id': self.id,
             'grade': self.grade,
-            'foreign_id_subject': self.foreign_id_subject
+            'foreign_id_subject': self.foreign_id_subject,
+            'table': self.__tablename__ 
         }
 
 class Subsections(db.Model):
@@ -74,7 +77,8 @@ class Subsections(db.Model):
         return {
             'id': self.id,
             'subsection': self.subsection,
-            'foreign_id_grade': self.foreign_id_grade
+            'foreign_id_grade': self.foreign_id_grade,
+            'table': self.__tablename__ 
         }
 
 class Central_contents(db.Model):
@@ -90,7 +94,8 @@ class Central_contents(db.Model):
         return {
             'id': self.id,
             'central_content': self.central_content,
-            'foreign_id_subsection': self.foreign_id_subsection
+            'foreign_id_subsection': self.foreign_id_subsection,
+            'table': self.__tablename__ 
         }
 
 class Central_requirements(db.Model):
@@ -106,6 +111,7 @@ class Central_requirements(db.Model):
         return {
             'id': self.id,
             'central_requirement': self.central_requirement,
-            'foreign_id_grade': self.foreign_id_grade
+            'foreign_id_grade': self.foreign_id_grade,
+            'table': self.__tablename__ 
         }
 
