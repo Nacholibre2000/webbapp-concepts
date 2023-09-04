@@ -4,6 +4,7 @@ type Item = {
   id: number;
   table: string;
   [key: string]: any;  // This allows for additional fields
+  [key: string]: any;  // This allows for additional fields
 };
 
 export default function Sidebar() {
@@ -65,6 +66,7 @@ export default function Sidebar() {
               className="text-sm text-base text-gray-400 font-normal hover:text-gray-100 font-bold block mb-2"
               onClick={() => toggleExpand(item.id, item.table)}
             >
+              {item.displayName || "Unnamed Item"}
               {item.displayName || "Unnamed Item"}
             </button>
             {/* Update condition to check for expanded items */}
