@@ -15,29 +15,13 @@ def fetch_related_items(table_name, item_id):
             subject_dict['children'] = fetch_related_items('Subjects', subject.id)
             children.append(subject_dict)
     elif table_name == 'Subjects':
-        for subject in related_subjects:
-            subject_dict = subject.serialize()
-            subject_dict['children'] = fetch_related_items('Subjects', subject.id)
-            children.append(subject_dict)
-    elif table_name == 'Subjects':
         related_grades = Grades.query.filter_by(foreign_id_subject=item_id).all()
-        for grade in related_grades:
-            grade_dict = grade.serialize()
-            grade_dict['children'] = fetch_related_items('Grades', grade.id)
-            children.append(grade_dict)
         for grade in related_grades:
             grade_dict = grade.serialize()
             grade_dict['children'] = fetch_related_items('Grades', grade.id)
             children.append(grade_dict)
     elif table_name == 'Grades':
         related_subsections = Subsections.query.filter_by(foreign_id_grade=item_id).all()
-        related_central_requirements = Central_requirements.query.filter_by(foreign_id_grade=item_id).all()
-        for subsection in related_subsections:
-            subsection_dict = subsection.serialize()
-            subsection_dict['children'] = fetch_related_items('Subsections', subsection.id)
-            children.append(subsection_dict)
-        for central_requirement in related_central_requirements:
-            children.append(central_requirement.serialize())
         related_central_requirements = Central_requirements.query.filter_by(foreign_id_grade=item_id).all()
         for subsection in related_subsections:
             subsection_dict = subsection.serialize()

@@ -66,7 +66,6 @@ export default function Sidebar() {
               onClick={() => toggleExpand(item.id, item.table)}
             >
               {item.displayName || "Unnamed Item"}
-              {item.displayName || "Unnamed Item"}
             </button>
             {/* Update condition to check for expanded items */}
             {expandedItems.has(`${item.id}-${item.table}`) && item.children && renderTree(item.children, level + 1)}
