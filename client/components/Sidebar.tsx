@@ -4,7 +4,6 @@ type Item = {
   id: number;
   table: string;
   [key: string]: any;  // This allows for additional fields
-  [key: string]: any;  // This allows for additional fields
 };
 
 export default function Sidebar() {
