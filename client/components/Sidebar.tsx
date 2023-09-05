@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import FunnelIcon from './FunnelIcon'; 
 
 type Item = {
   id: number;
@@ -10,6 +11,7 @@ export default function Sidebar() {
   const [data, setData] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [toggledItems, setToggledItems] = useState<Set<string>>(new Set());
+  const [expandedTextItems, setExpandedTextItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     //console.log("Running useEffect");  // Debugging line
@@ -63,27 +65,39 @@ export default function Sidebar() {
     setExpandedItems(newExpandedItems);
   };
 
+  const toggleTextExpand = (id: number, table: string) => {
+    const compositeKey = `${id}-${table}`;
+    const newTextItems = new Set(expandedTextItems);
+    if (newTextItems.has(compositeKey)) {
+      newTextItems.delete(compositeKey);
+    } else {
+      newTextItems.add(compositeKey);
+    }
+    setExpandedTextItems(newTextItems);
+  };
+
   const renderTree = (items: Item[], level: number = 0) => {
     const indent = 10 * level;  // 20 pixels of indentation per level
-
+  
     return (
       <ul style={{ marginLeft: `${indent}px` }}>
         {items.map((item) => (
-          <li key={`${item.id}-${item.table}`}>
-            <div className="hover:bg-gray-700 p-2 rounded flex justify-between items-center">
+          <li key={`${item.id}-${item.table}`} className="w-full"> {/* Set width to 100% */}
+            <div className={`hover:bg-gray-700 w-full p-2 rounded flex justify-between items-center`}>
               <button 
-                className={`text-left text-sm text-base text-gray-400 font-normal hover:text-gray-100 ${toggledItems.has(`${item.id}-${item.table}`) ? 'font-bold' : ''} block mb-2`}
+                className={`text-left text-sm text-base text-gray-400 ${toggledItems.has(`${item.id}-${item.table}`) ? 'font-bold' : 'font-normal'} hover:text-gray-100 block mb-2 w-full text-left`}  
                 onClick={() => toggleExpand(item.id, item.table)}
               >
-                {item.displayName.length > 20 ? item.displayName.substring(0, 20) + '...' : item.displayName || "Unnamed Item"}
+                {/* Updated text display logic */}
+                {expandedTextItems.has(`${item.id}-${item.table}`) ? item.displayName : (item.displayName.length > 20 ? item.displayName.substring(0, 20) + '...' : item.displayName)}
               </button>
               {item.displayName.length > 20 && (
-                <button onClick={() => toggleExpand(item.id, item.table)}>
+                <button onClick={() => toggleTextExpand(item.id, item.table)}>
                   ...
                 </button>
               )}
               <button onClick={() => toggleBold(item.id, item.table, data)}>
-                <i className={`far fa-circle ${toggledItems.has(`${item.id}-${item.table}`) ? 'fas fa-circle' : ''}`}></i>
+                <FunnelIcon toggled={toggledItems.has(`${item.id}-${item.table}`)} />
               </button>
             </div>
             {expandedItems.has(`${item.id}-${item.table}`) && item.children && renderTree(item.children, level + 1)}
