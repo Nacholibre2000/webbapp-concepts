@@ -4,13 +4,15 @@ import FunnelIcon from './FunnelIcon';
 type Item = {
   id: number;
   table: string;
+  status: 'detoggled' | 'toggled' | 'half-toggled';
+  foreign_id?: number;
+  parentTable?: string;
   [key: string]: any;  // This allows for additional fields
 };
 
 export default function Sidebar() {
   const [data, setData] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [toggledItems, setToggledItems] = useState<Set<string>>(new Set());
   const [expandedTextItems, setExpandedTextItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -26,14 +28,19 @@ export default function Sidebar() {
   
         const mapDataRecursively = (data: any[]): any[] => {
           return data.map((item: any) => {
-            //console.log("Mapping item:", item);  // Debugging line
-            const newItem = { ...item, displayName: mapToDisplayName(item) };
+            const newItem = { 
+              ...item, 
+              displayName: mapToDisplayName(item),
+              foreign_id: item.foreign_id_school || item.foreign_id_subject || item.foreign_id_grade || item.foreign_id_subsection,
+              parentTable: item.foreign_id_school ? 'schools' : item.foreign_id_subject ? 'subjects' : item.foreign_id_grade ? 'grades' : item.foreign_id_subsection ? 'subsections' : null
+            };
             if (item.children) {
               newItem.children = mapDataRecursively(item.children);
             }
             return newItem;
           });
-        };        
+        };
+              
   
         const mappedData = mapDataRecursively(allData);
         setData(mappedData);
@@ -41,16 +48,57 @@ export default function Sidebar() {
       });
   }, []);  
 
+  const toggleItemAndChildren = (id: number, table: string, items: Item[], newState: 'detoggled' | 'toggled') => {
+    // Create a new copy of items
+    const newItems = [...items];
+    const compositeKey = `${id}-${table}`;
+    const itemIndex = newItems.findIndex(i => `${i.id}-${i.table}` === compositeKey);
+    
+    if (itemIndex !== -1) {
+      newItems[itemIndex] = { ...newItems[itemIndex], status: newState };
+      if (newItems[itemIndex].children) {
+        newItems[itemIndex].children.forEach(child => {
+          toggleItemAndChildren(child.id, child.table, newItems, newState);
+        });
+      }
+    }
+    setData(newItems);  // Update the state
+  };   
+  
   const toggleBold = (id: number, table: string, items: Item[]) => {
     const compositeKey = `${id}-${table}`;
-    const newToggledItems = new Set(toggledItems);
-    if (newToggledItems.has(compositeKey)) {
-      newToggledItems.delete(compositeKey);
-    } else {
-      newToggledItems.add(compositeKey);
+    const item = items.find(i => `${i.id}-${i.table}` === compositeKey);
+    
+    if (item) {
+      const newState = item.status === 'toggled' ? 'detoggled' : 'toggled';
+      toggleItemAndChildren(id, table, items, newState);
+      
+      let currentItem = item;
+      while (currentItem) {
+        updateParentStatus(currentItem, items);
+        currentItem = items.find(i => i.id === currentItem.foreign_id && i.table === currentItem.parentTable);
+      }
     }
-    setToggledItems(newToggledItems);
   };
+  
+
+  const updateParentStatus = (item: Item, items: Item[]) => {
+  if (!item.foreign_id || !item.parentTable) return;
+
+  const parentItem = items.find(i => i.id === item.foreign_id && i.table === item.parentTable);
+  if (!parentItem || !parentItem.children) return;
+
+  const childStatuses = new Set(parentItem.children.map(child => child.status));
+  
+  if (childStatuses.size === 1 && childStatuses.has('toggled')) {
+    parentItem.status = 'toggled';
+  } else if (childStatuses.size === 1 && childStatuses.has('detoggled')) {
+    parentItem.status = 'detoggled';
+  } else {
+    parentItem.status = 'half-toggled';
+  }
+};
+
 
   const toggleExpand = (id: number, table: string) => {
     //console.log("Toggling item with id and table:", id, table);  // Debugging line
@@ -97,7 +145,7 @@ export default function Sidebar() {
                 </button>
               )}
               <button onClick={() => toggleBold(item.id, item.table, data)}>
-                <FunnelIcon toggled={toggledItems.has(`${item.id}-${item.table}`)} />
+                <FunnelIcon status={item.status} />
               </button>
             </div>
             {expandedItems.has(`${item.id}-${item.table}`) && item.children && renderTree(item.children, level + 1)}
