@@ -9,6 +9,7 @@ type Item = {
 export default function Sidebar() {
   const [data, setData] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [toggledItems, setToggledItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     //console.log("Running useEffect");  // Debugging line
@@ -38,6 +39,17 @@ export default function Sidebar() {
       });
   }, []);  
 
+  const toggleBold = (id: number, table: string, items: Item[]) => {
+    const compositeKey = `${id}-${table}`;
+    const newToggledItems = new Set(toggledItems);
+    if (newToggledItems.has(compositeKey)) {
+      newToggledItems.delete(compositeKey);
+    } else {
+      newToggledItems.add(compositeKey);
+    }
+    setToggledItems(newToggledItems);
+  };
+
   const toggleExpand = (id: number, table: string) => {
     //console.log("Toggling item with id and table:", id, table);  // Debugging line
     const compositeKey = `${id}-${table}`;
@@ -52,29 +64,34 @@ export default function Sidebar() {
   };
 
   const renderTree = (items: Item[], level: number = 0) => {
-    //console.log("Items at level", level, ":", items);
-  
     const indent = 10 * level;  // 20 pixels of indentation per level
-  
+
     return (
       <ul style={{ marginLeft: `${indent}px` }}>
         {items.map((item) => (
           <li key={`${item.id}-${item.table}`}>
-            {/* Update onClick handler to pass both id and table */}
-            <button 
-              className="text-sm text-base text-gray-400 font-normal hover:text-gray-100 font-bold block mb-2"
-              onClick={() => toggleExpand(item.id, item.table)}
-            >
-              {item.displayName || "Unnamed Item"}
-            </button>
-            {/* Update condition to check for expanded items */}
+            <div className="hover:bg-gray-700 p-2 rounded flex justify-between items-center">
+              <button 
+                className={`text-left text-sm text-base text-gray-400 font-normal hover:text-gray-100 ${toggledItems.has(`${item.id}-${item.table}`) ? 'font-bold' : ''} block mb-2`}
+                onClick={() => toggleExpand(item.id, item.table)}
+              >
+                {item.displayName.length > 20 ? item.displayName.substring(0, 20) + '...' : item.displayName || "Unnamed Item"}
+              </button>
+              {item.displayName.length > 20 && (
+                <button onClick={() => toggleExpand(item.id, item.table)}>
+                  ...
+                </button>
+              )}
+              <button onClick={() => toggleBold(item.id, item.table, data)}>
+                <i className={`far fa-circle ${toggledItems.has(`${item.id}-${item.table}`) ? 'fas fa-circle' : ''}`}></i>
+              </button>
+            </div>
             {expandedItems.has(`${item.id}-${item.table}`) && item.children && renderTree(item.children, level + 1)}
           </li>
         ))}
       </ul>
     );
   };
-  
 
   return <aside className="bg-gray-800 text-white w-80 p-10">{renderTree(data)}</aside>;
 }
