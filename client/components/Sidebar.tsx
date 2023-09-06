@@ -57,7 +57,7 @@ export default function Sidebar() {
     if (itemIndex !== -1) {
       newItems[itemIndex] = { ...newItems[itemIndex], status: newState };
       if (newItems[itemIndex].children) {
-        newItems[itemIndex].children.forEach(child => {
+        newItems[itemIndex].children.forEach((child: Item) => {
           toggleItemAndChildren(child.id, child.table, newItems, newState);
         });
       }
@@ -73,10 +73,10 @@ export default function Sidebar() {
       const newState = item.status === 'toggled' ? 'detoggled' : 'toggled';
       toggleItemAndChildren(id, table, items, newState);
       
-      let currentItem = item;
+      let currentItem: Item | null = item;
       while (currentItem) {
         updateParentStatus(currentItem, items);
-        currentItem = items.find(i => i.id === currentItem.foreign_id && i.table === currentItem.parentTable);
+        currentItem = currentItem ? items.find(i => i.id === currentItem.foreign_id && i.table === currentItem.parentTable) as Item | null : null;
       }
     }
   };
@@ -88,7 +88,7 @@ export default function Sidebar() {
   const parentItem = items.find(i => i.id === item.foreign_id && i.table === item.parentTable);
   if (!parentItem || !parentItem.children) return;
 
-  const childStatuses = new Set(parentItem.children.map(child => child.status));
+  const childStatuses = new Set(parentItem.children.map((child: Item) => child.status));
   
   if (childStatuses.size === 1 && childStatuses.has('toggled')) {
     parentItem.status = 'toggled';
@@ -133,8 +133,8 @@ export default function Sidebar() {
           <li key={`${item.id}-${item.table}`} className="w-full"> {/* Set width to 100% */}
             <div className={`hover:bg-gray-700 w-full p-2 rounded flex justify-between items-center`}>
               <button 
-                className={`text-left text-sm text-base text-gray-400 ${toggledItems.has(`${item.id}-${item.table}`) ? 'font-bold' : 'font-normal'} hover:text-gray-100 block mb-2 w-full text-left`}  
-                onClick={() => toggleExpand(item.id, item.table)}
+                className={`text-left text-sm text-base text-gray-400 ${item.status === 'toggled' ? 'font-bold' : 'font-normal'} hover:text-gray-100 block mb-2 w-full text-left`}  
+                onClick={() => toggleExpand(item.id, item.table)}                
               >
                 {/* Updated text display logic */}
                 {expandedTextItems.has(`${item.id}-${item.table}`) ? item.displayName : (item.displayName.length > 20 ? item.displayName.substring(0, 20) + '...' : item.displayName)}
