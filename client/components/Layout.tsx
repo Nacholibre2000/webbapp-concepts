@@ -8,6 +8,7 @@ type LayoutProps = {
 };
 
 export default function Layout({ children }: LayoutProps) {
+  console.log("Layout component rendered");  // debugging
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
