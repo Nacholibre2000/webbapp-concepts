@@ -16,70 +16,80 @@ export default function Sidebar() {
   const [expandedTextItems, setExpandedTextItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    //console.log("Running useEffect");  // Debugging line
-    fetch('http://localhost:8080/api/sidebar-data')
-      .then((res) => res.json())
-      .then((allData) => {
-        //console.log("All data from API:", allData);  // Debugging line
-  
-        const mapToDisplayName = (item: any) => {
-          return item.school || item.subject || item.grade || item.subsection || item.central_requirement || item.central_content || "Unnamed Item";
-        };
-  
-        const mapDataRecursively = (data: any[]): any[] => {
-          return data.map((item: any) => {
-            const newItem = { 
-              ...item, 
-              displayName: mapToDisplayName(item),
-              foreign_id: item.foreign_id_school || item.foreign_id_subject || item.foreign_id_grade || item.foreign_id_subsection,
-              parentTable: item.foreign_id_school ? 'schools' : item.foreign_id_subject ? 'subjects' : item.foreign_id_grade ? 'grades' : item.foreign_id_subsection ? 'subsections' : null
-            };
-            if (item.children) {
-              newItem.children = mapDataRecursively(item.children);
-            }
-            return newItem;
-          });
-        };
-              
-  
-        const mappedData = mapDataRecursively(allData);
-        setData(mappedData);
-        setExpandedItems(new Set());  // Reset the expanded items
-      });
-  }, []);  
-
-  const toggleItemAndChildren = (id: number, table: string, items: Item[], newState: 'detoggled' | 'toggled') => {
-    // Create a new copy of items
-    const newItems = [...items];
-    const compositeKey = `${id}-${table}`;
-    const itemIndex = newItems.findIndex(i => `${i.id}-${i.table}` === compositeKey);
+    try {
+      //console.log("Running useEffect");  // Debugging line
+      fetch('http://localhost:8080/api/sidebar-data')
+        .then((res) => res.json())
+        .then((allData) => {
+          console.log("All data from API:", allData);  // Debugging line
     
-    if (itemIndex !== -1) {
-      newItems[itemIndex] = { ...newItems[itemIndex], status: newState };
-      if (newItems[itemIndex].children) {
-        newItems[itemIndex].children.forEach((child: Item) => {
-          toggleItemAndChildren(child.id, child.table, newItems, newState);
+          const mapToDisplayName = (item: any) => {
+            return item.school || item.subject || item.grade || item.subsection || item.central_requirement || item.central_content || "Unnamed Item";
+          };
+    
+          const mapDataRecursively = (data: any[]): any[] => {
+            return data.map((item: any) => {
+              const newItem = { 
+                ...item, 
+                status: 'detoggled',  
+                displayName: mapToDisplayName(item),
+                foreign_id: item.foreign_id_school || item.foreign_id_subject || item.foreign_id_grade || item.foreign_id_subsection,
+                parentTable: item.foreign_id_school ? 'schools' : item.foreign_id_subject ? 'subjects' : item.foreign_id_grade ? 'grades' : item.foreign_id_subsection ? 'subsections' : null
+              };
+              if (item.children) {
+                newItem.children = mapDataRecursively(item.children);
+              }
+              return newItem;
+            });
+          };
+                
+    
+          const mappedData = mapDataRecursively(allData);
+          console.log("Mapped Data:", mappedData);  // Debugging line
+          setData(mappedData);
+          console.log("State Data:", data);  // Debugging line
+          setExpandedItems(new Set());  // Reset the expanded items
         });
-      }
+    } catch (error) {
+      console.error("An error occurred:", error);
     }
-    setData(newItems);  // Update the state
-  };   
+  }, []);
   
-  const toggleBold = (id: number, table: string, items: Item[]) => {
+  const toggleStatusRecursively = (data: Item[], id: number, newStatus: 'detoggled' | 'toggled' | 'half-toggled') => {
+    data.forEach((item: Item) => {
+      if (item.id === id) {
+        item.status = newStatus;
+      }
+      if (item.children) {
+        toggleStatusRecursively(item.children, id, newStatus);
+      }
+    });
+  };
+
+  const handleToggle = (id: number, table: string) => {
+    const itemToToggle = data.find(item => item.id === id && item.table === table);
+    if (!itemToToggle) return;
+
+    const newStatus: 'detoggled' | 'toggled' = itemToToggle.status === 'toggled' ? 'detoggled' : 'toggled';
+    toggleStatusRecursively(data, id, newStatus);
+    setData([...data]);  // Trigger a re-render
+  }; 
+  
+  const toggleBold = (id: number, table: string) => {
     const compositeKey = `${id}-${table}`;
-    const item = items.find(i => `${i.id}-${i.table}` === compositeKey);
+    const item = data.find(i => `${i.id}-${i.table}` === compositeKey);
     
     if (item) {
-      const newState = item.status === 'toggled' ? 'detoggled' : 'toggled';
-      toggleItemAndChildren(id, table, items, newState);
+      handleToggle(id, table);  // Replacing toggleItemAndChildren with handleToggle
       
       let currentItem: Item | null = item;
       while (currentItem) {
-        updateParentStatus(currentItem, items);
-        currentItem = currentItem ? items.find(i => i.id === currentItem.foreign_id && i.table === currentItem.parentTable) as Item | null : null;
+        updateParentStatus(currentItem, data);  // Using data directly from state
+        currentItem = currentItem ? data.find(i => i.id === currentItem.foreign_id && i.table === currentItem.parentTable) as Item | null : null;
       }
     }
   };
+  
   
 
   const updateParentStatus = (item: Item, items: Item[]) => {
@@ -131,6 +141,7 @@ export default function Sidebar() {
       <ul style={{ marginLeft: `${indent}px` }}>
         {items.map((item) => (
           <li key={`${item.id}-${item.table}`} className="w-full"> {/* Set width to 100% */}
+            {console.log(`Item ID: ${item.id}, Table: ${item.table}, Status: ${item.status}`)} {/* Debugging line */}
             <div className={`hover:bg-gray-700 w-full p-2 rounded flex justify-between items-center`}>
               <button 
                 className={`text-left text-sm text-base text-gray-400 ${item.status === 'toggled' ? 'font-bold' : 'font-normal'} hover:text-gray-100 block mb-2 w-full text-left`}  
