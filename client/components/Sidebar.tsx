@@ -1,4 +1,38 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useState } from 'react';
+
+const Sidebar = () => {
+  const [data, setData] = useState(null); // Initialize with null
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:8080/api/sidebar-data');
+      const result = await response.json();
+      setData(result);
+      console.log('Sidebar data fetched:', result); // Log the fetched data
+    };
+
+    fetchData();
+
+    return () => {
+      // Cleanup function
+      console.log('Cleaning up...');
+    };
+  }, []);
+
+  return (
+    <div>
+      <h1>Sidebar</h1>
+      <pre>{JSON.stringify(data, null, 2)}</pre> {/* Display the fetched data */}
+    </div>
+  );
+};
+
+export default Sidebar;
+
+
+
+
+/* import React, { useEffect, useReducer } from 'react';
 import FunnelIcon from './FunnelIcon';
 
 type Item = {
@@ -123,6 +157,9 @@ export default function Sidebar() {
     } catch (error) {
       console.error("An error occurred:", error);
     }
+    return () => {
+      console.log('Component will unmount');
+    };
   }, []); 
   
   const handleToggle = (id: number, table: string) => {
@@ -162,4 +199,4 @@ export default function Sidebar() {
   };
 
   return <aside className="bg-gray-800 text-white w-80 p-10">{renderTree(data)}</aside>;
-}
+} */

@@ -35,6 +35,10 @@ def fetch_related_items(table_name, item_id):
             children.append(central_content.serialize())
     return children
 
+@views.route('/api/test-data', methods=['GET'])
+def get_data():
+    return jsonify({"message": "Hello from Flask!"})
+
 @views.route('/api/sidebar-data', methods=['GET'])
 def get_sidebar_data():
     #print("Fetching initial sidebar data...")  # Debugging line
