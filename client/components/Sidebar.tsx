@@ -1,44 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
-const Sidebar = () => {
-  const [data, setData] = useState(null); // Initialize with null
-
-  useEffect(() => {
-    let ignore = false; // Initialize the ignore flag
-
-    const fetchData = async () => {
-      const response = await fetch('http://localhost:8080/api/sidebar-data');
-      const result = await response.json();
-      
-      if (!ignore) { // Only update state if ignore flag is false
-        setData(result);
-        console.log('Sidebar data fetched:', result); // Log the fetched data
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      ignore = true; // Set ignore flag to true in the cleanup function
-      console.log('Cleaning up...'); // Log the cleanup
-    };
-  }, []);
-
-  return (
-    <div>
-      <h1>Sidebar</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre> {/* Display the fetched data */}
-    </div>
-  );
-};
-
-export default Sidebar;
-
-
-
-
-
-/* import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import FunnelIcon from './FunnelIcon';
 
 type Item = {
@@ -130,11 +90,14 @@ export default function Sidebar() {
   const [data, dispatch] = useReducer(sidebarReducer, []);
 
   useEffect(() => {
-    console.log("Data state changed:", data);
-    try {
-      fetch('http://localhost:8080/api/sidebar-data')
-        .then((res) => res.json())
-        .then((allData) => {
+    let ignore = false;  // Initialize the ignore flag
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/sidebar-data');
+        const allData = await response.json();
+
+        if (!ignore) {  // Check the ignore flag before updating state
           console.log("All data from API:", allData);  // Debugging line
     
           const mapToDisplayName = (item: any) => {
@@ -158,15 +121,20 @@ export default function Sidebar() {
             });
           };
           const mappedData = mapDataRecursively(allData);
-          dispatch({ type: 'INIT_DATA', payload: mappedData });
-        });
-    } catch (error) {
-      console.error("An error occurred:", error);
-    }
-    return () => {
-      console.log('Component will unmount');
-    };
-  }, []); 
+            dispatch({ type: 'INIT_DATA', payload: mappedData });
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
+      };
+  
+      fetchData();  // Invoke the fetchData function
+  
+      return () => {
+        ignore = true;  // Set the ignore flag to true in the cleanup function
+        console.log('Component will unmount');
+      };
+    }, []); 
   
   const handleToggle = (id: number, table: string) => {
     console.log("handleToggle called with id and table:", id, table);
@@ -205,4 +173,4 @@ export default function Sidebar() {
   };
 
   return <aside className="bg-gray-800 text-white w-80 p-10">{renderTree(data)}</aside>;
-} */
+} 
