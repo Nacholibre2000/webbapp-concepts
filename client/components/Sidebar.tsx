@@ -4,18 +4,23 @@ const Sidebar = () => {
   const [data, setData] = useState(null); // Initialize with null
 
   useEffect(() => {
+    let ignore = false; // Initialize the ignore flag
+
     const fetchData = async () => {
       const response = await fetch('http://localhost:8080/api/sidebar-data');
       const result = await response.json();
-      setData(result);
-      console.log('Sidebar data fetched:', result); // Log the fetched data
+      
+      if (!ignore) { // Only update state if ignore flag is false
+        setData(result);
+        console.log('Sidebar data fetched:', result); // Log the fetched data
+      }
     };
 
     fetchData();
 
     return () => {
-      // Cleanup function
-      console.log('Cleaning up...');
+      ignore = true; // Set ignore flag to true in the cleanup function
+      console.log('Cleaning up...'); // Log the cleanup
     };
   }, []);
 
@@ -28,6 +33,7 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
 
 
 
