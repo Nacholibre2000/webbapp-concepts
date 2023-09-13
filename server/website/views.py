@@ -1,9 +1,54 @@
 from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
+from flask_socketio import emit
+from . import socketio
 from .models import Concepts, Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
 from . import db
+import time
 
 views = Blueprint('views', __name__)
+
+@socketio.on('connect')
+def handle_connect():
+    print('Backend: Client connected')
+    initial_levels = ['Schools', 'Subjects']
+    flat_data = flatten_data(levels=initial_levels)
+    print('Backend: Emitting initial data:', flat_data)
+    emit('initial_data', flat_data)
+    socketio.start_background_task(background_task)
+
+def background_task():
+    while True:
+        time.sleep(5)
+        next_levels = ['Grades', 'Subsections', 'Central_contents', 'Central_requirements']
+        next_level_data = flatten_data(levels=next_levels)
+        print('Backend: Emitting next level data:', next_level_data)
+        emit('next_level_data', next_level_data)
+
+def flatten_data(levels=None):
+    schools = Schools.query.all()
+    flat_data = []
+    for school in schools:
+        flat_data.append(school.serialize())
+        subjects = Subjects.query.filter_by(foreign_id_school=school.id).all()
+        for subject in subjects:
+            flat_data.append(subject.serialize())
+            grades = Grades.query.filter_by(foreign_id_subject=subject.id).all()
+            for grade in grades:
+                flat_data.append(grade.serialize())
+                subsections = Subsections.query.filter_by(foreign_id_grade=grade.id).all()
+                central_requirements = Central_requirements.query.filter_by(foreign_id_grade=grade.id).all()
+                for subsection in subsections:
+                    flat_data.append(subsection.serialize())
+                    central_contents = Central_contents.query.filter_by(foreign_id_subsection=subsection.id).all()
+                    for central_content in central_contents:
+                        flat_data.append(central_content.serialize())
+                for central_requirement in central_requirements:
+                    flat_data.append(central_requirement.serialize())
+
+    if levels:
+        flat_data = [item for item in flat_data if item['table'] in levels]
+    return flat_data
 
 def fetch_related_items(table_name, item_id):
     #print(f"Fetching related items for table: {table_name}, ID: {item_id}")  # Debugging line

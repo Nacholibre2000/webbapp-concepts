@@ -5,6 +5,9 @@ from flask_cors import CORS
 from sqlalchemy import create_engine
 import os
 from dotenv import load_dotenv
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
 
 # Load environment variables from .env file
 load_dotenv()
@@ -43,6 +46,8 @@ def create_app():
     @login_manager.user_loader
     def load_user(id):
       return Users.query.get(int(id))
+    
+    socketio.init_app(app, cors_allowed_origins="*")
 
     return app
 

@@ -1,55 +1,61 @@
 import React, { useEffect, useReducer } from 'react';
+import io from 'socket.io-client';
 import FunnelIcon from './FunnelIcon';
+
+const socket = io('http://localhost:8080');  
 
 type Item = {
   id: number;
   table: string;
   status: 'detoggled' | 'toggled' | 'half-toggled';
   expanded: boolean;
+  displayName?: string;  // Add this line if displayName is supposed to be there
   foreign_id?: number;
   parentTable?: string;
   [key: string]: any;
+  children?: Item[];
 };
+
 
 type Action =
   | { type: 'INIT_DATA'; payload: Item[] }
   | { type: 'TOGGLE_STATUS'; id: number; table: string }
   | { type: 'TOGGLE_EXPAND'; id: number; table: string };
 
-const sidebarReducer = (state: Item[], action: Action) => {
-  console.log("Reducer called with action:", action);
-  let newState: Item[] = [];
+  const handleInitData = (state: Item[], action: { type: 'INIT_DATA'; payload: Item[] }): Item[] => {
+    return action.payload;
+  };
+
+  const handleToggleStatus = (state: Item[], action: { type: 'TOGGLE_STATUS'; id: number; table: string }): Item[] => {
+  return state.map((item) => {
+    if (item.id === action.id && item.table === action.table) {
+      return { ...item, status: item.status === 'toggled' ? 'detoggled' : 'toggled' };
+    }
+    if (item.children) {
+      item.children = toggleStatusRecursively(item.children, action.id, action.table, item.status);
+    }
+    return item;
+  });
+};
+
+const handleToggleExpand = (state: Item[], action: { type: 'TOGGLE_EXPAND'; id: number; table: string }): Item[] => {
+  return state.map((item) => {
+    if (item.id === action.id && item.table === action.table) {
+      return { ...item, expanded: !item.expanded };
+    }
+    return item;
+  });
+};
+
+
+const sidebarReducer = (state: Item[], action: Action): Item[] => {
   switch (action.type) {
     case 'INIT_DATA':
-      return action.payload;
-
+      return handleInitData(state, action);
     case 'TOGGLE_STATUS':
-      newState = state.map((item) => {
-        if (item.id === action.id && item.table === action.table) {
-          return { ...item, status: item.status === 'toggled' ? 'detoggled' : 'toggled' };
-        }
-        if (item.children) {
-          // Recursive call to update children
-          item.children = toggleStatusRecursively(item.children, action.id, action.table, item.status);
-        }
-        return item;
-      });
-      // Here you can add logic to update the parent status
-      newState.forEach((item) => {
-        updateParentStatus(item, newState);
-      });
-      return newState;
-
-      case 'TOGGLE_EXPAND':
-        newState = state.map((item) => {
-          if (item.id === action.id && item.table === action.table) {
-            return { ...item, expanded: !item.expanded };
-          }        
-          return item;
-        });
-        return newState;
-      
-
+      return handleToggleStatus(state, action);
+    case 'TOGGLE_EXPAND':
+      return handleToggleExpand(state, action);
     default:
       return state;
   }
@@ -67,82 +73,36 @@ const toggleStatusRecursively = (data: Item[], id: number, table: string, newSta
   });
 };
 
-
-const updateParentStatus = (item: Item, items: Item[]) => {
-  if (!item.foreign_id || !item.parentTable) return;
-
-  const parentItem = items.find(i => i.id === item.foreign_id && i.table === item.parentTable);
-  if (!parentItem || !parentItem.children) return;
-
-  const childStatuses = new Set(parentItem.children.map((child: Item) => child.status));
-  
-  if (childStatuses.size === 1 && childStatuses.has('toggled')) {
-    parentItem.status = 'toggled';
-  } else if (childStatuses.size === 1 && childStatuses.has('detoggled')) {
-    parentItem.status = 'detoggled';
-  } else {
-    parentItem.status = 'half-toggled';
-  }
-};
-
 export default function Sidebar() {
-  console.log("Sidebar component rendered");
-  const [data, dispatch] = useReducer(sidebarReducer, []);
+  const [data, dispatch] = useReducer(sidebarReducer, [] as Item[]);
 
   useEffect(() => {
-    let ignore = false;  // Initialize the ignore flag
+    socket.on('connect', () => {
+      console.log('Frontend: Connected to the server');
+    });
+  
+    socket.on('initial_data', (initialData) => {
+      console.log('Frontend: Received initial data:', initialData);
+      dispatch({ type: 'INIT_DATA', payload: initialData });
+    });
+  
+    socket.on('next_level_data', (nextLevelData) => {
+      console.log('Frontend: Received next level data:', nextLevelData);
+      // Add your state update logic here if needed
+    });
+  
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+  
+  
 
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/sidebar-data');
-        const allData = await response.json();
-
-        if (!ignore) {  // Check the ignore flag before updating state
-          console.log("All data from API:", allData);  // Debugging line
-    
-          const mapToDisplayName = (item: any) => {
-            return item.school || item.subject || item.grade || item.subsection || item.central_requirement || item.central_content || "Unnamed Item";
-          };
-    
-          const mapDataRecursively = (data: any[]): any[] => {
-            return data.map((item: any) => {
-              const newItem = { 
-                ...item, 
-                status: 'detoggled',  
-                expanded: false,  // Initialize here
-                displayName: mapToDisplayName(item),
-                foreign_id: item.foreign_id_school || item.foreign_id_subject || item.foreign_id_grade || item.foreign_id_subsection,
-                parentTable: item.foreign_id_school ? 'schools' : item.foreign_id_subject ? 'subjects' : item.foreign_id_grade ? 'grades' : item.foreign_id_subsection ? 'subsections' : null
-              };
-              if (item.children) {
-                newItem.children = mapDataRecursively(item.children);
-              }
-              return newItem;
-            });
-          };
-          const mappedData = mapDataRecursively(allData);
-            dispatch({ type: 'INIT_DATA', payload: mappedData });
-          }
-        } catch (error) {
-          console.error("An error occurred:", error);
-        }
-      };
-  
-      fetchData();  // Invoke the fetchData function
-  
-      return () => {
-        ignore = true;  // Set the ignore flag to true in the cleanup function
-        console.log('Component will unmount');
-      };
-    }, []); 
-  
   const handleToggle = (id: number, table: string) => {
-    console.log("handleToggle called with id and table:", id, table);
     dispatch({ type: 'TOGGLE_STATUS', id, table });
   };
   
   const handleExpand = (id: number, table: string) => {
-    console.log("handleExpand called with id and table:", id, table);
     dispatch({ type: 'TOGGLE_EXPAND', id, table });
   };
   
