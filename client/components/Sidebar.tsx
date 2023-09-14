@@ -93,6 +93,7 @@ export default function Sidebar() {
   
     return () => {
       socket.disconnect();
+      console.log('Frontend: Disconnected from the server');
     };
   }, []);
   

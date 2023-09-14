@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
 from flask_socketio import emit
+from flask import current_app as app
 from . import socketio
 from .models import Concepts, Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
 from . import db
@@ -10,20 +11,23 @@ views = Blueprint('views', __name__)
 
 @socketio.on('connect')
 def handle_connect():
+    print('Debug: handle_connect function called')  # Debugging line
     print('Backend: Client connected')
     initial_levels = ['Schools', 'Subjects']
     flat_data = flatten_data(levels=initial_levels)
     print('Backend: Emitting initial data:', flat_data)
     emit('initial_data', flat_data)
-    socketio.start_background_task(background_task)
+    socketio.start_background_task(target=background_task, app=app)
 
-def background_task():
-    while True:
-        time.sleep(5)
-        next_levels = ['Grades', 'Subsections', 'Central_contents', 'Central_requirements']
-        next_level_data = flatten_data(levels=next_levels)
-        print('Backend: Emitting next level data:', next_level_data)
-        emit('next_level_data', next_level_data)
+def background_task(app):
+    with app.app_context():
+        while True:
+            time.sleep(5)
+            next_levels = ['Grades', 'Subsections', 'Central_contents', 'Central_requirements']
+            next_level_data = flatten_data(levels=next_levels)
+            print('Backend: Emitting next level data:', next_level_data)
+            emit('next_level_data', next_level_data)
+
 
 def flatten_data(levels=None):
     schools = Schools.query.all()
