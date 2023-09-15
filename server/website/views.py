@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
-from flask_socketio import emit
+from flask_socketio import emit, join_room
 from flask import current_app as app
 from . import socketio
 from .models import Concepts, Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
@@ -11,22 +11,25 @@ views = Blueprint('views', __name__)
 
 @socketio.on('connect')
 def handle_connect():
+    print("App object in handle_connect:", app)
     print('Debug: handle_connect function called')  # Debugging line
     print('Backend: Client connected')
     initial_levels = ['Schools', 'Subjects']
     flat_data = flatten_data(levels=initial_levels)
     print('Backend: Emitting initial data:', flat_data)
     emit('initial_data', flat_data)
-    socketio.start_background_task(target=background_task, app=app)
+    room = request.sid  # Get session ID
+    join_room(room)  # Join the room
+    socketio.start_background_task(target=background_task, app=app._get_current_object(), room=room)
 
-def background_task(app):
+def background_task(app, room):
     with app.app_context():
         while True:
             time.sleep(5)
             next_levels = ['Grades', 'Subsections', 'Central_contents', 'Central_requirements']
             next_level_data = flatten_data(levels=next_levels)
             print('Backend: Emitting next level data:', next_level_data)
-            emit('next_level_data', next_level_data)
+            emit('next_level_data', next_level_data, room=room)  # Emit to the specific room
 
 
 def flatten_data(levels=None):

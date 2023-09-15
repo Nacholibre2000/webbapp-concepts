@@ -92,7 +92,7 @@ export default function Sidebar() {
     });
   
     return () => {
-      socket.disconnect();
+      socket.disconnect(); //cleanup
       console.log('Frontend: Disconnected from the server');
     };
   }, []);
