@@ -1,8 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
-import io from 'socket.io-client';
+import axios from 'axios';
 import FunnelIcon from './FunnelIcon';
-
-const socket = io('http://localhost:8080');  
 
 type Item = {
   id: number;
@@ -75,29 +73,22 @@ const toggleStatusRecursively = (data: Item[], id: number, table: string, newSta
 
 export default function Sidebar() {
   const [data, dispatch] = useReducer(sidebarReducer, [] as Item[]);
-
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Frontend: Connected to the server');
-    });
-  
-    socket.on('initial_data', (initialData) => {
-      console.log('Frontend: Received initial data:', initialData);
-      dispatch({ type: 'INIT_DATA', payload: initialData });
-    });
-  
-    socket.on('next_level_data', (nextLevelData) => {
-      console.log('Frontend: Received next level data:', nextLevelData);
-      // Add your state update logic here if needed
-    });
-  
-    return () => {
-      socket.disconnect(); //cleanup
-      console.log('Frontend: Disconnected from the server');
-    };
+    // Fetch all data from the Flask API
+    axios.get('http://localhost:8080/api/sidebar-data')  
+      .then(response => {
+        const allData = response.data;
+        console.log('Frontend: Received all data:', allData);
+        dispatch({ type: 'INIT_DATA', payload: allData });
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+      return () => {
+        //cleanup
+          console.log('Clean up');
+        };
   }, []);
-  
-  
 
   const handleToggle = (id: number, table: string) => {
     dispatch({ type: 'TOGGLE_STATUS', id, table });
