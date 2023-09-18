@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, flash, jsonify, json, current_app as app
 from flask_login import login_required, current_user
-from flask import current_app as app
 from .models import Concepts, Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
 from . import db
 
@@ -8,16 +7,12 @@ views = Blueprint('views', __name__)
 
 @views.route('/api/sidebar-data', methods=['GET'])
 def get_all_data():
-    test_query = Schools.query.first()
-    print(f"Test query result: {test_query}")
-    all_levels = ['Schools', 'Subjects', 'Grades', 'Subsections', 'Central_contents', 'Central_requirements']
-    print("Levels:", all_levels)  # Debugging line
-    flat_data = flatten_data(levels=all_levels)
+    flat_data = flatten_data()  # Updated the function call
     print(f"Sidebar data: {flat_data}")  # Debugging line
     return jsonify(flat_data)
 
 
-def flatten_data(levels=None):
+def flatten_data():
     schools = Schools.query.all()
     flat_data = []
     for school in schools:
@@ -47,12 +42,7 @@ def flatten_data(levels=None):
                 for central_requirement in central_requirements:
                     flat_data.append(central_requirement.serialize())
     
-    print("Flat data before filtering:", flat_data)  # Debugging line
-
-    if levels:
-        flat_data = [item for item in flat_data if item['table'] in levels]
-
-    print("Flat data after filtering:", flat_data)  # Debugging line
+    print("Flat data:", flat_data)  # Debugging line
     
     return flat_data
 

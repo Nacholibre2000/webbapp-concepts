@@ -20,6 +20,43 @@ type Action =
   | { type: 'TOGGLE_STATUS'; id: number; table: string }
   | { type: 'TOGGLE_EXPAND'; id: number; table: string };
 
+  const mapToDisplayName = (item: any) => {
+    return item.school || item.subject || item.grade || item.subsection || item.central_requirement || item.central_content || "Unnamed Item";
+  };
+  
+  const mapFlatData = (data: any[]): any[] => {
+    return data.map((item: any) => {
+      return { 
+        ...item, 
+        displayName: mapToDisplayName(item),
+        foreign_id: item.foreign_id_school || item.foreign_id_subject || item.foreign_id_grade || item.foreign_id_subsection,
+        parentTable: item.foreign_id_school ? 'schools' : item.foreign_id_subject ? 'subjects' : item.foreign_id_grade ? 'grades' : item.foreign_id_subsection ? 'subsections' : null
+      };
+    });
+  };
+  
+
+  const transformFlatToNested = (flatData: Item[]): Item[] => {
+    const map = new Map<number, Item>();
+    const roots: Item[] = [];
+  
+    flatData.forEach((item) => {
+      map.set(item.id, { ...item, children: [] });
+    });
+  
+    flatData.forEach((item) => {
+      const parent = map.get(item.foreign_id);
+      if (parent) {
+        parent.children.push(map.get(item.id));
+      } else {
+        roots.push(map.get(item.id));
+      }
+    });
+  
+    return roots;
+  };
+  
+
   const handleInitData = (state: Item[], action: { type: 'INIT_DATA'; payload: Item[] }): Item[] => {
     return action.payload;
   };
@@ -73,21 +110,23 @@ const toggleStatusRecursively = (data: Item[], id: number, table: string, newSta
 
 export default function Sidebar() {
   const [data, dispatch] = useReducer(sidebarReducer, [] as Item[]);
+
   useEffect(() => {
-    // Fetch all data from the Flask API
-    axios.get('http://localhost:8080/api/sidebar-data')  
+    axios.get('http://localhost:8080/api/sidebar-data')
       .then(response => {
-        const allData = response.data;
-        console.log('Frontend: Received all data:', allData);
-        dispatch({ type: 'INIT_DATA', payload: allData });
+        const flatData = response.data;
+        const mappedData = mapFlatData(flatData);  // Use the new function here
+        const nestedData = transformFlatToNested(mappedData);  // If you still want to transform it to nested for the UI
+        dispatch({ type: 'INIT_DATA', payload: nestedData });
       })
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-      return () => {
-        //cleanup
-          console.log('Clean up');
-        };
+
+    // Cleanup function
+    return () => {
+      console.log('Clean up');
+    };
   }, []);
 
   const handleToggle = (id: number, table: string) => {
