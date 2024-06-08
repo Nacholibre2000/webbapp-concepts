@@ -1,5 +1,6 @@
 {
     "name": "Python and Node.js Project",
+    "context": "..",
     "dockerFile": "Dockerfile",
     "extensions": [
         "ms-python.python",
@@ -9,8 +10,8 @@
         "dsznajder.es7-react-js-snippets",
         "xabikos.JavaScriptSnippets"
     ],
-    "settings": { 
+    "settings": {
         "terminal.integrated.shell.linux": "/bin/bash"
     },
-    "postCreateCommand": "poetry install && npm install"
+    "postCreateCommand": "cd /app/server && poetry install && cd /app/client && npm install"
 }
